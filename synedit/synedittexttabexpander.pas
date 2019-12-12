@@ -275,7 +275,7 @@ function TSynEditStringTabExpander.ExpandedString(Index: integer): string;
 var
   Line: String;
   CharWidths: TPhysicalCharWidths;
-  i, j, l: Integer;
+  i, j, l, ll: Integer;
 begin
 // this is only used by trimmer.lengthOfLongestLine / which is not called, if a tab module is present
   Line := fSynStrings[Index];
@@ -289,19 +289,19 @@ begin
     for i := 0 to length(CharWidths)-1 do
       l := l + (CharWidths[i] and PCWMask);
     SetLength(Result, l);
+    ll := l;
 
     l := 1;
     for i := 1 to length(CharWidths) do begin
-      if Line[i] <> #9 then begin
-        Result[l] := Line[i];
-        inc(l);
-      end else begin
-        for j := 1 to (CharWidths[i-1] and PCWMask) do begin
+      for j := 1 to (CharWidths[i-1] and PCWMask) do begin
+        if Line[i] <> #9 then
+          Result[l] := Line[i]
+        else
           Result[l] := ' ';
-          inc(l);
-        end;
+        inc(l);
       end;
     end;
+    Assert(l=ll+1);
     FTabData[Index] := length(Result);
   end;
 end;
