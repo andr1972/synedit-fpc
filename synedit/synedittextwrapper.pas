@@ -84,6 +84,7 @@ type
     function getWWC: TCharSet;
     procedure ListCleared(Sender: TObject);
     Procedure LinesChanged(Sender: TSynEditStrings; AIndex, ACount : Integer);
+    Procedure DoLineCountChanged(Sender: TSynEditStrings; AIndex, ACount : Integer);
     Procedure LineCountChanged(Sender: TSynEditStrings; AIndex, ACount : Integer);
     procedure setCharsInWindow(AValue: integer);
     procedure SetEnabled(const AValue : Boolean);
@@ -290,12 +291,11 @@ begin
   end;
 end;
 
-procedure TSynEditStringWrappingList.LineCountChanged(Sender: TSynEditStrings;
+procedure TSynEditStringWrappingList.DoLineCountChanged(Sender: TSynEditStrings;
   AIndex, ACount: Integer);
 var
   i, hrl,rn: Integer;
 begin
-  if (not fEnabled) then exit;
 //  if IsWrapping then exit;
   // resize the map to real lines, to accomodate current visual lines count
   IncViewChangeStamp;
@@ -349,6 +349,12 @@ begin
     fMaxRealLine:=fRealLineNumber[hrl]
   else
     fMaxRealLine:= -1;
+end;
+
+procedure TSynEditStringWrappingList.LineCountChanged(Sender: TSynEditStrings;
+  AIndex, ACount: Integer);
+begin
+  if fEnabled then DoLineCountChanged(Sender, AIndex, ACount);
 end;
 
 procedure TSynEditStringWrappingList.setCharsInWindow(AValue: integer);
@@ -522,7 +528,7 @@ end;
 
 procedure TSynEditStringWrappingList.ReWrap;
 var
-  l:integer;
+  l, hrl:integer;
 begin
   //foces wrapping and joining of every line
   Inc(FWrappingCount);
@@ -531,6 +537,11 @@ begin
       SetLength(fRealLineNumber,fSynStrings.Count);
       for l:= 0 to High(fRealLineNumber) do
         fRealLineNumber[l] := l;
+      hrl := High(fRealLineNumber);
+      if hrl >= 0 then
+        fMaxRealLine:=fRealLineNumber[hrl]
+      else
+        fMaxRealLine:= -1;
     end;
     l := 0;
     while l < fSynStrings.Count do begin
@@ -558,6 +569,7 @@ begin
      for l:=0 to RealCount-1 do
        st.Add(RealLine[l]);
      fSynStrings.Assign(st);
+     DoLineCountChanged(fSynStrings, 0, fSynStrings.Count);
   finally
     st.Free;
   end;
