@@ -3412,6 +3412,7 @@ begin
   if (index < -1) or (index > fLinesInWindow + 1)
   or (fTextIndexList[index+1] < 0) then exit(-1);
   Result := fTextIndexList[index+1]+1;
+  Result := DisplayView.LineNumber(Result);
 end;
 
 function TSynEditFoldedView.GetTextIndex(index : Integer) : Integer;

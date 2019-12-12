@@ -132,7 +132,7 @@ uses
   SynGutterBase, SynGutter, SynGutterCodeFolding, SynGutterChanges,
   SynGutterLineNumber, SynGutterMarks, SynGutterLineOverview,
   SynEditMiscClasses, SynEditHighlighter, LazSynTextArea, SynTextDrawer,
-  SynEditTextBidiChars;
+  SynEditTextBidiChars, SynEditTextWrapper;
 
 const
   ScrollBarWidth=0;
@@ -288,7 +288,8 @@ type
     eoAutoHideCursor,          // Hide mouse cursor, when new text is typed
     eoColorSelectionTillEol,   // Colorize selection background only till EOL of each line, not till edge of control
     eoPersistentCaretStopBlink,// only if eoPersistentCaret > do not blink, draw fixed line
-    eoNoScrollOnSelectRange    // SelectALl, SelectParagraph, SelectToBrace will not scroll
+    eoNoScrollOnSelectRange,    // SelectALl, SelectParagraph, SelectToBrace will not scroll
+    eoWordWrap                 // Truncates long lines into lines that fits on screen
   );
   TSynEditorOptions2 = set of TSynEditorOption2;
 
@@ -529,6 +530,7 @@ type
     FFoldedLinesView:  TSynEditFoldedView;
     FShareOptions: TSynEditorShareOptions;
     FVisibleSpecialChars: TSynVisibleSpecialChars;
+    FWrappedLinesView: TSynEditStringWrappingList;
     FTrimmedLinesView: TSynEditStringTrimmingList;
     FDoubleWidthChrLinesView: SynEditStringDoubleWidthChars;
     FBidiChrLinesView: TSynEditStringBidiChars;
@@ -2117,6 +2119,8 @@ begin
 
   {$ENDIF} // WithSynExperimentalCharWidth
 
+  FWrappedLinesView := TSynEditStringWrappingList.Create(FTabbedLinesView, fCaret);
+
   // Pointer to the First/Lowest View
   // TODO: this should be Folded...
   FTheLinesView := FTabbedLinesView;
@@ -2595,6 +2599,7 @@ begin
   FreeAndNil(FStrings);
   FreeAndNil(FTabbedLinesView);
   FreeAndNil(FTrimmedLinesView); // has reference to caret
+  FreeAndNil(FWrappedLinesView);
   {$IFnDEF WithOutSynBiDi}
   FreeAndNil(FBidiChrLinesView);
   {$ENDIF}
@@ -2801,7 +2806,7 @@ end;
 
 function TCustomSynEdit.SynGetText: string;
 begin
-  Result := fLines.Text;
+  Result := FTheLinesView.Text;
 end;
 
 function TCustomSynEdit.RealGetText: TCaption;
@@ -4708,6 +4713,8 @@ end;
 procedure TCustomSynEdit.RealSetText(const Value: TCaption);
 begin
   FLines.Text := Value; // Do not trim
+  if FWrappedLinesView.Enabled then
+     FWrappedLinesView.ReWrap;
 end;
 
 function TCustomSynEdit.CurrentMaxTopView: Integer;
@@ -8128,6 +8135,7 @@ begin
   FCaret.SkipTabs := (eoCaretSkipTab in fOptions2);
   if Assigned(fMarkupSelection) then
     fMarkupSelection.ColorTillEol := eoColorSelectionTillEol in fOptions2;
+  FWrappedLinesView.Enabled := eoWordWrap in fOptions2;
 end;
 
 procedure TCustomSynEdit.SetMouseOptions(AValue: TSynEditorMouseOptions);
@@ -8237,6 +8245,9 @@ begin
       if not (eoScrollPastEof in Options) then
         TopView := TopView;
     end;
+    FFoldedLinesView.LinesInWindow := LinesInWindow;
+    FMarkupManager.LinesInWindow := LinesInWindow;
+    FWrappedLinesView.CharsInWindow:= CharsInWindow;
   finally
     DecStatusChangeLock;
   end;

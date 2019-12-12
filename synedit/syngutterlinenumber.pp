@@ -225,7 +225,7 @@ end;
 
 procedure TSynGutterLineNumber.Paint(Canvas : TCanvas; AClip : TRect; FirstLine, LastLine : integer);
 var
-  i, c, iLine: integer;
+  i, c, iLine, iPrevLine: integer;
   rcLine: TRect;
   s: string;
   dc: HDC;
@@ -261,8 +261,10 @@ begin
     // prepare the rect initially
     rcLine := AClip;
     rcLine.Bottom := AClip.Top;
+    iLine := FoldView.DisplayNumber[FirstLine-1];
     for i := FirstLine to LastLine do
     begin
+      iPrevLine := iLine;
       iLine := FoldView.DisplayNumber[i];
       if (iLine < 0) or (iLine > c) then break;
       // next line rect
@@ -273,8 +275,12 @@ begin
       ShowDot := ((iLine mod ShowOnlyLineNumbersMultiplesOf) <> 0)
           and (iLine <> TCustomSynEdit(SynEdit).CaretY) and (iLine <> 1)
           and (iLine <> SynEdit.Lines.Count);
-      // Get the formatted line number or dot
-      s := FormatLineNumber(iLine, ShowDot);
+      // if same as previous line number, then don't show
+      if iLine = iPrevLine then
+         s := ''
+      else
+         // Get the formatted line number or dot
+        s := FormatLineNumber(iLine, ShowDot);
       Inc(rcLine.Bottom, LineHeight);
       // erase the background and draw the line number string in one go
       fTextDrawer.ExtTextOut(rcLine.Left, rcLine.Top, ETO_OPAQUE or ETO_CLIPPED, rcLine,

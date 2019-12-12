@@ -222,6 +222,7 @@ type
     function ViewToTextIndex(AIndex: TLineIdx): TLineIdx; virtual;
     //function ViewToTextIndexEx(AIndex: TLineIdx; out AScreenRange: TLineRange): TLineIdx;
     // todo: gutter info
+    function LineNumber(AIndex: TLineIdx):TLineIdx;virtual;
   end;
 
   { TLazSynDisplayViewEx }
@@ -572,6 +573,14 @@ end;
 function TLazSynDisplayView.ViewToTextIndex(AIndex: TLineIdx): TLineIdx;
 begin
   Result := NextView.ViewToTextIndex(AIndex);
+end;
+
+function TLazSynDisplayView.LineNumber(AIndex: TLineIdx): TLineIdx;
+begin
+  if Assigned(NextView) then
+     result := NextView.LineNumber(AIndex)
+  else
+     result := AIndex;
 end;
 
 { TSynLogicalPhysicalConvertor }
