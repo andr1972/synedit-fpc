@@ -1,0 +1,17 @@
+Source: https://github.com/User4martin/lazarus , folders components\synedit and components\synunihighlighter
+2019-12-12
+Mirrored from source
+commit 0b61168ae5d5e1cab2a8396267138673734fa128 (HEAD -> master, origin/master, origin/HEAD)
+Author: juha <juha@localhost>
+Date:   Thu Dec 12 13:53:41 2019 +0000
+    LCL-GTK3: Improve canvas operations. Issue #36374, patch from Alexey Tor.
+     SVN 62380@trunk
+commit 2266107957fc13ac9a6da96f20283d08c56bef37
+
+last Synedit commit:
+git log -- components/synedit/*
+commit b62f6cd224bded50fcd5d430da162c238938aaf2
+Author: martin <lazarus@mfriebe.de>
+Date:   Sun Dec 1 13:48:21 2019 +0100
+    SynEdit: MarkupFoldColor, fix crash when HL does not have config.
+
