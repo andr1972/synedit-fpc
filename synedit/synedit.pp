@@ -2597,9 +2597,9 @@ begin
   FreeAndNil(FInternalBlockSelection);
   FreeAndNil(FBlockSelection);
   FreeAndNil(FStrings);
+  FreeAndNil(FWrappedLinesView);
   FreeAndNil(FTabbedLinesView);
   FreeAndNil(FTrimmedLinesView); // has reference to caret
-  FreeAndNil(FWrappedLinesView);
   {$IFnDEF WithOutSynBiDi}
   FreeAndNil(FBidiChrLinesView);
   {$ENDIF}
